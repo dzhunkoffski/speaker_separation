@@ -3,14 +3,14 @@ from operator import xor
 from torch.utils.data import ConcatDataset, DataLoader
 
 import ss.augmentations
-import ss.datasets
+import ss.dataset
 from ss import batch_sampler as batch_sampler_module
 from ss.base.base_text_encoder import BaseTextEncoder
 from ss.collate_fn.collate import collate_fn
 from ss.utils.parse_config import ConfigParser
 
 
-def get_dataloaders(configs: ConfigParser, text_encoder: BaseTextEncoder):
+def get_dataloaders(configs: ConfigParser):
     dataloaders = {}
     for split, params in configs["data"].items():
         num_workers = params.get("num_workers", 1)
@@ -27,8 +27,8 @@ def get_dataloaders(configs: ConfigParser, text_encoder: BaseTextEncoder):
         datasets = []
         for ds in params["datasets"]:
             datasets.append(configs.init_obj(
-                ds, ss.datasets, text_encoder=text_encoder, config_parser=configs,
-                wave_augs=wave_augs, spec_augs=spec_augs))
+                ds, ss.datasets, config_parser=configs, split=split,
+                wave_augs=wave_augs, spec_augs=spec_augs, ))
         assert len(datasets)
         if len(datasets) > 1:
             dataset = ConcatDataset(datasets)
