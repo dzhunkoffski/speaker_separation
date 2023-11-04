@@ -1,4 +1,4 @@
-from collections import Callable
+from typing import Callable
 from typing import List
 
 import ss.augmentations.spectrogram_augmentations

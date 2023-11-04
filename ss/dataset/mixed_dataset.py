@@ -17,14 +17,17 @@ class LibriSpeechMixedDataset(Dataset):
             speakers_dataset: str, 
             path_mixtures: str,  
             snr_levels: List[int], 
-            update_steps: int,
             trim_db: int,
             vad_db: int,
             audio_len: int,
             n_mixes: int,
             audio_template: str = '*.flac',
+            update_steps: int = 100,
             premixed: bool = False,
-            config_parser: ConfigParser = None):
+            config_parser: ConfigParser = None,
+            wave_augs: callable = None,
+            spec_augs: callable = None
+            ):
         
         if premixed == False:
             speaker_ids = [speaker.name for speaker in os.scandir(speakers_dataset)]
@@ -45,9 +48,9 @@ class LibriSpeechMixedDataset(Dataset):
                 audio_len=audio_len
             )
 
-        self.reference_files = sorted(glob(os.path.join(path_mixtures, '*-ref.wav')))
-        self.mixes_files = sorted(glob(os.path.join(path_mixtures, '*-mixed.wav')))
-        self.target_files = sorted(glob(os.path.join(path_mixtures, '*-target.wav')))
+        self.reference_files = sorted(glob(os.path.join(path_mixtures, '*-ref.wav')))[:n_mixes]
+        self.mixes_files = sorted(glob(os.path.join(path_mixtures, '*-mixed.wav')))[:n_mixes]
+        self.target_files = sorted(glob(os.path.join(path_mixtures, '*-target.wav')))[:n_mixes]
 
         self.config_parser = config_parser
 
@@ -73,12 +76,13 @@ class LibriSpeechMixedDataset(Dataset):
         return audio_tensor
     
     def __getitem__(self, item):
-        # TODO: extract noise and target id
+        # TODO: load spectrogram
         target_id, noise_id = self._extract_ids(self.mixes_files[item])
         ref_audio = self._load_audio(self.reference_files[item])
         mix_audio = self._load_audio(self.mixes_files[item])
         target_audio = self._load_audio(self.target_files[item])
         return {
+            'mix_path': self.mixes_files[item],
             'reference': ref_audio,
             'mix': mix_audio,
             'target': target_audio,

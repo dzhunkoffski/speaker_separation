@@ -1,0 +1,135 @@
+wandb_version: 1
+
+name:
+  desc: null
+  value: degug_spexp
+n_gpu:
+  desc: null
+  value: 1
+preprocessing:
+  desc: null
+  value:
+    sr: 16000
+    spectrogram: {}
+    log_spec: true
+augmentations:
+  desc: null
+  value:
+    wave: []
+    spectrogram: []
+arch:
+  desc: null
+  value:
+    type: SpexPlus
+    args:
+      sr: 16000
+      n_encoder_filters: 128
+      speaker_embed_dim: 128
+      n_resnets: 2
+      O: 32
+      Q: 3
+      P: 32
+      n_tcn_stacks: 2
+      n_tcn_blocks_in_stack: 2
+data:
+  desc: null
+  value:
+    train:
+      batch_size: 10
+      num_workers: 4
+      datasets:
+      - type: LibriSpeechMixedDataset
+        args:
+          speakers_dataset: /home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other
+          path_mixtures: /home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-other
+          snr_levels:
+          - -5
+          - 0
+          - 5
+          trim_db: 20
+          vad_db: 20
+          audio_len: 4
+          n_mixes: 10
+          premixed: true
+    val:
+      batch_size: 10
+      num_workers: 4
+      datasets:
+      - type: LibriSpeechMixedDataset
+        args:
+          speakers_dataset: /home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other
+          path_mixtures: /home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-other
+          snr_levels:
+          - -5
+          - 0
+          - 5
+          trim_db: 20
+          vad_db: 20
+          audio_len: 4
+          n_mixes: 10
+          premixed: true
+optimizer:
+  desc: null
+  value:
+    type: Adam
+    args:
+      lr: 0.001
+loss:
+  desc: null
+  value:
+    type: SpexLoss
+    args:
+      alpha: 0.1
+      beta: 0.1
+metrics:
+  desc: null
+  value: []
+lr_scheduler:
+  desc: null
+  value:
+    type: OneCycleLR
+    args:
+      steps_per_epoch: 50
+      epochs: 100
+      anneal_strategy: cos
+      max_lr: 0.001
+      pct_start: 0.05
+trainer:
+  desc: null
+  value:
+    epochs: 100
+    save_dir: saved/
+    save_period: 10
+    verbosity: 1
+    monitor: min val_loss
+    early_stop: 100
+    visualize: wandb
+    wandb_project: speaker_separation
+    len_epoch: 50
+    grad_norm_clip: 100
+_wandb:
+  desc: null
+  value:
+    python_version: 3.10.12
+    cli_version: 0.15.12
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1699132465.72222
+    t:
+      1:
+      - 1
+      - 41
+      - 55
+      2:
+      - 1
+      - 41
+      - 55
+      3:
+      - 16
+      - 23
+      4: 3.10.12
+      5: 0.15.12
+      8:
+      - 5
+      13: linux-x86_64

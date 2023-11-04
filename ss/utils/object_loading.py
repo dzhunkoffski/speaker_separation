@@ -5,7 +5,6 @@ from torch.utils.data import ConcatDataset, DataLoader
 import ss.augmentations
 import ss.dataset
 from ss import batch_sampler as batch_sampler_module
-from ss.base.base_text_encoder import BaseTextEncoder
 from ss.collate_fn.collate import collate_fn
 from ss.utils.parse_config import ConfigParser
 
@@ -27,7 +26,7 @@ def get_dataloaders(configs: ConfigParser):
         datasets = []
         for ds in params["datasets"]:
             datasets.append(configs.init_obj(
-                ds, ss.datasets, config_parser=configs, split=split,
+                ds, ss.dataset, config_parser=configs, split=split,
                 wave_augs=wave_augs, spec_augs=spec_augs, ))
         assert len(datasets)
         if len(datasets) > 1:

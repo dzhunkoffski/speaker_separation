@@ -9,11 +9,10 @@ import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 from torchvision.transforms import ToTensor
 from tqdm import tqdm
+import wandb
 
 from ss.base import BaseTrainer
-from ss.base.base_text_encoder import BaseTextEncoder
 from ss.logger.utils import plot_spectrogram_to_buf
-from ss.metric.utils import calc_cer, calc_wer
 from ss.utils import inf_loop, MetricTracker
 
 
@@ -31,14 +30,12 @@ class Trainer(BaseTrainer):
             config,
             device,
             dataloaders,
-            text_encoder,
             lr_scheduler=None,
             len_epoch=None,
             skip_oom=True,
     ):
         super().__init__(model, criterion, metrics, optimizer, config, device)
         self.skip_oom = skip_oom
-        self.text_encoder = text_encoder
         self.config = config
         self.train_dataloader = dataloaders["train"]
         if len_epoch is None:
@@ -64,7 +61,7 @@ class Trainer(BaseTrainer):
         """
         Move all necessary tensors to the HPU
         """
-        for tensor_for_gpu in ["spectrogram", "text_encoded"]:
+        for tensor_for_gpu in ["reference", "mix", "target"]:
             batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
         return batch
 
@@ -115,7 +112,8 @@ class Trainer(BaseTrainer):
                     "learning rate", self.lr_scheduler.get_last_lr()[0]
                 )
                 self._log_predictions(**batch)
-                self._log_spectrogram(batch["spectrogram"])
+                # TODO:
+                # self._log_spectrogram(batch["spectrogram"])
                 self._log_scalars(self.train_metrics)
                 # we don't want to reset train metrics at the start of every epoch
                 # because we are interested in recent train metrics
@@ -136,15 +134,7 @@ class Trainer(BaseTrainer):
         if is_train:
             self.optimizer.zero_grad()
         outputs = self.model(**batch)
-        if type(outputs) is dict:
-            batch.update(outputs)
-        else:
-            batch["logits"] = outputs
-
-        batch["log_probs"] = F.log_softmax(batch["logits"], dim=-1)
-        batch["log_probs_length"] = self.model.transform_input_lengths(
-            batch["spectrogram_length"]
-        )
+        batch.update(outputs)
         batch["loss"] = self.criterion(**batch)
         if is_train:
             batch["loss"].backward()
@@ -181,7 +171,8 @@ class Trainer(BaseTrainer):
             self.writer.set_step(epoch * self.len_epoch, part)
             self._log_scalars(self.evaluation_metrics)
             self._log_predictions(**batch)
-            self._log_spectrogram(batch["spectrogram"])
+            # TODO:
+            # self._log_spectrogram(batch["spectrogram"])
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
@@ -200,38 +191,37 @@ class Trainer(BaseTrainer):
 
     def _log_predictions(
             self,
-            text,
-            log_probs,
-            log_probs_length,
-            audio_path,
-            examples_to_log=10,
+            mix,
+            target,
+            mix_path,
+            s1, s2, s3,
+            loss,
             *args,
             **kwargs,
     ):
-        # TODO: implement logging of beam search results
+        examples_to_log = 10
         if self.writer is None:
             return
-        argmax_inds = log_probs.cpu().argmax(-1).numpy()
-        argmax_inds = [
-            inds[: int(ind_len)]
-            for inds, ind_len in zip(argmax_inds, log_probs_length.numpy())
-        ]
-        argmax_texts_raw = [self.text_encoder.decode(inds) for inds in argmax_inds]
-        argmax_texts = [self.text_encoder.ctc_decode(inds) for inds in argmax_inds]
-        tuples = list(zip(argmax_texts, text, argmax_texts_raw, audio_path))
+        # TODO: add audio_path
+        # print('mix:', len(mix))
+        # print('target:', len(target))
+        # print('s1:', len(s1))
+        # print('mixpath:', len(mix_path))
+        tuples = list(zip(mix, target, s1, mix_path))
         shuffle(tuples)
         rows = {}
-        for pred, target, raw_pred, audio_path in tuples[:examples_to_log]:
-            target = BaseTextEncoder.normalize_text(target)
-            wer = calc_wer(target, pred) * 100
-            cer = calc_cer(target, pred) * 100
+        for _mix, _target, _raw_pred, _mix_path in tuples[:examples_to_log]:
+            mix_audio = wandb.Audio(_mix.squeeze().cpu().detach().numpy(), sample_rate=16000)
+            target_audio = wandb.Audio(_target.squeeze().cpu().detach().numpy(), sample_rate=16000)
+            pred_audio = wandb.Audio(_raw_pred.squeeze().cpu().detach().numpy(), sample_rate=16000)
 
-            rows[Path(audio_path).name] = {
-                "target": target,
-                "raw prediction": raw_pred,
-                "predictions": pred,
-                "wer": wer,
-                "cer": cer,
+            _loss = self.criterion(s1,s2,s3,target).item()
+
+            rows[Path(_mix_path).name] = {
+                "mix": mix_audio,
+                "target": target_audio,
+                "prediction": pred_audio,
+                "loss": _loss
             }
         self.writer.add_table("predictions", pd.DataFrame.from_dict(rows, orient="index"))
 

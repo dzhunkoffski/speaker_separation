@@ -1,5 +1,5 @@
-from ss.loss.CTCLossWrapper import CTCLossWrapper as CTCLoss
+from ss.loss.spex_loss import SpexLoss
 
 __all__ = [
-    "CTCLoss"
+    "SpexLoss"
 ]

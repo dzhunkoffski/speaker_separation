@@ -26,14 +26,11 @@ np.random.seed(SEED)
 def main(config):
     logger = config.get_logger("train")
 
-    # text_encoder
-    text_encoder = config.get_text_encoder()
-
     # setup data_loader instances
     dataloaders = get_dataloaders(config)
 
     # build model architecture, then print to console
-    model = config.init_obj(config["arch"], module_arch, n_class=len(text_encoder))
+    model = config.init_obj(config["arch"], module_arch)
     logger.info(model)
 
     # prepare for (multi-device) GPU training
@@ -60,7 +57,6 @@ def main(config):
         loss_module,
         metrics,
         optimizer,
-        text_encoder=text_encoder,
         config=config,
         device=device,
         dataloaders=dataloaders,

@@ -262,18 +262,17 @@ class SpexPlus(BaseModel):
         )
         self.activasion = nn.ReLU()
 
-    def forward(self, input):
-        mix = input['mix']
-        ref = input['reference']
+    def forward(self, mix, reference, **batch):
+        # mix = input['mix']
+        # ref = input['reference']
 
         short_features, middle_features, long_features = self.speech_encoder(mix)
         mix_features = torch.cat((short_features, middle_features, long_features), dim=1)
         mix_features = self.activasion(mix_features)
 
-        speaker_embedding1, speaker_embedding2, speaker_embedding3 = self.speech_encoder(ref)
+        speaker_embedding1, speaker_embedding2, speaker_embedding3 = self.speech_encoder(reference)
         speaker_embedding = torch.cat((speaker_embedding1, speaker_embedding2, speaker_embedding3), dim=1)
         speaker_embedding = self.activasion(speaker_embedding)
-        print(speaker_embedding.size())
         speaker_embedding = self.speaker_encoder(speaker_embedding)
 
         mask_short, mask_middle, mask_long = self.speaker_extractor(mix_features, speaker_embedding)
@@ -285,6 +284,11 @@ class SpexPlus(BaseModel):
         middle_features = self.decoder_middle(middle_features)
         long_features = self.decoder_long(long_features)
 
-        return {'short_audio': short_features, 'middle_audio': middle_features, 'long_audio': long_features}
+        # FIXME: different lengths
+        short_features = nn.functional.pad(short_features, pad=(0, mix.size()[-1] - short_features.size()[-1]), mode='constant', value=0)
+        middle_features = nn.functional.pad(middle_features, pad=(0, mix.size()[-1] - middle_features.size()[-1]), mode='constant', value=0)
+        long_features = nn.functional.pad(long_features, pad=(0, mix.size()[-1] - long_features.size()[-1]), mode='constant', value=0)
+
+        return {'s1': short_features, 's2': middle_features, 's3': long_features}
 
 
