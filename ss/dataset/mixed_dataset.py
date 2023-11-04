@@ -3,6 +3,7 @@ import os
 from glob import glob
 
 import torch
+import torchaudio
 from torch.utils.data import Dataset
 
 from ss.utils.parse_config import ConfigParser
@@ -48,6 +49,8 @@ class LibriSpeechMixedDataset(Dataset):
         self.mixes_files = sorted(glob(os.path.join(path_mixtures, '*-mixed.wav')))
         self.target_files = sorted(glob(os.path.join(path_mixtures, '*-target.wav')))
 
+        self.config_parser = config_parser
+
         assert len(self.reference_files) == len(self.mixes_files) and len(self.mixes_files) == len(self.target_files)
     
     def __len__(self):
@@ -60,13 +63,25 @@ class LibriSpeechMixedDataset(Dataset):
         noise_id = filename.split('_')[1]
         return target_id, noise_id
     
+    def _load_audio(self, path):
+        audio_tensor, sr = torchaudio.load(path)
+        audio_tensor = audio_tensor[0:1, :]
+        if self.config_parser is not None:
+            target_sr = self.config_parser["preprocessing"]["sr"]
+            if sr != target_sr:
+                audio_tensor = torchaudio.functional.resample(audio_tensor, sr, target_sr)
+        return audio_tensor
+    
     def __getitem__(self, item):
         # TODO: extract noise and target id
         target_id, noise_id = self._extract_ids(self.mixes_files[item])
+        ref_audio = self._load_audio(self.reference_files[item])
+        mix_audio = self._load_audio(self.mixes_files[item])
+        target_audio = self._load_audio(self.target_files[item])
         return {
-            'reference': self.reference_files[item],
-            'mix': self.mixes_files[item],
-            'target': self.target_files[item],
+            'reference': ref_audio,
+            'mix': mix_audio,
+            'target': target_audio,
             'target_id': target_id,
             'noise_id': noise_id
         }
