@@ -34,7 +34,7 @@ class Trainer(BaseTrainer):
             len_epoch=None,
             skip_oom=True,
     ):
-        super().__init__(model, criterion, metrics, optimizer, config, device)
+        super().__init__(model, criterion, metrics, optimizer, config, device, lr_scheduler)
         self.skip_oom = skip_oom
         self.config = config
         self.train_dataloader = dataloaders["train"]
@@ -202,11 +202,6 @@ class Trainer(BaseTrainer):
         examples_to_log = 10
         if self.writer is None:
             return
-        # TODO: add audio_path
-        # print('mix:', len(mix))
-        # print('target:', len(target))
-        # print('s1:', len(s1))
-        # print('mixpath:', len(mix_path))
         tuples = list(zip(mix, target, s1, mix_path))
         shuffle(tuples)
         rows = {}

@@ -96,7 +96,7 @@ def create_mix(idx, triplet, snr_levels, out_dir, test=False, sr=16000, **kwargs
             mix = snr_mixer(s1_cut[i], s2_cut[i], snr)
             louds1 = meter.integrated_loudness(s1_cut[i])
             s1_cut[i] = pyln.normalize.loudness(s1_cut[i], louds1, -23.0)
-            loud_mix = meter.intergrated_loudness(mix)
+            loud_mix = meter.integrated_loudness(mix)
             mix = pyln.normalize.loudness(mix, loud_mix, -23.0)
 
             path_mix_i = path_mix.replace("-mixed.wav", f"_{i}-mixed.wav")
