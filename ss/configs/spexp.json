@@ -57,7 +57,7 @@
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
-                        "n_mixes": 10,
+                        "n_mixes": 1000,
                         "premixed": true
                     }
                 }
