@@ -7,14 +7,40 @@
         "log_spec": true
     },
     "augmentations": {
-        "wave": [],
+        "wave": [
+            {
+                "type": "PitchShift",
+                "args": {
+                    "n_steps": 4,
+                    "sample_rate": 16000,
+                    "p": 0.2
+                }
+            },
+            {
+                "type": "GaussianNoise",
+                "args": {
+                    "alpha": 1.0,
+                    "mean": 0.1,
+                    "std": 0.01,
+                    "p": 0.2
+                }
+            },
+            {
+                "type": "SpeedPerturbation",
+                "args": {
+                    "p": 0.2,
+                    "orig_freq": 16000,
+                    "factors": [0.5, 0.75, 1.25, 1.5]
+                }
+            }
+        ],
         "spectrogram": []
     },
     "arch": {
         "type": "SpexPlus",
         "args": {
             "sr": 16000,
-            "n_encoder_filters": 128,
+            "n_encoder_filters": 256,
             "speaker_embed_dim": 256,
             "n_resnets": 3,
             "O": 256,
@@ -38,7 +64,7 @@
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
-                        "n_mixes": 15000,
+                        "n_mixes": 25000,
                         "premixed": true
                     }
                 }
@@ -67,7 +93,7 @@
     "optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 1e-3
+            "lr": 3e-4
         }
     },
     "loss": {
@@ -84,8 +110,8 @@
           "steps_per_epoch": 500,
           "epochs": 100,
           "anneal_strategy": "cos",
-          "max_lr": 1e-3,
-          "pct_start": 0.07
+          "max_lr": 3e-4,
+          "pct_start": 0.05
         }
       },
     "trainer": {
