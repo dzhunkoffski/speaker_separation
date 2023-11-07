@@ -33,7 +33,7 @@
                     "type": "LibriSpeechMixedDataset",
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other",
-                        "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-other",
+                        "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean",
                         "snr_levels": [-5, 0, 5],
                         "trim_db": 20,
                         "vad_db": 20,
@@ -52,12 +52,12 @@
                     "type": "LibriSpeechMixedDataset",
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other",
-                        "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-other",
-                        "snr_levels": [0],
+                        "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean",
+                        "snr_levels": [-5, 0, 5],
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
-                        "n_mixes": 1000,
+                        "n_mixes": 10,
                         "premixed": true
                     }
                 }
@@ -77,7 +77,22 @@
             "beta": 0.1
         }
     },
-    "metrics": [],
+    "metrics": [
+        {
+            "type": "PESQ",
+            "args": {
+                "sampling_frequency": 16000,
+                "mode": "wb",
+                "epoch_freq": 5
+            }
+        },
+        {
+            "type": "EvalSISDR",
+            "args": {
+                "epoch_freq": 1
+            }
+        }
+    ],
     "lr_scheduler": {
         "type": "OneCycleLR",
         "args": {

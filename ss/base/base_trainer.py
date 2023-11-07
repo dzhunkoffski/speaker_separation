@@ -11,8 +11,6 @@ class BaseTrainer:
     """
     Base class for all trainers
     """
-    # TODO: control save_freq
-    # TODO: add PESQ as metric
 
     def __init__(self, model: BaseModel, criterion, metrics, optimizer, config, device, lr_scheduler=None):
         self.device = device

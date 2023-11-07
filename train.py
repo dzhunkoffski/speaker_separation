@@ -22,6 +22,11 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
+# TODO: PESQ metric
+# TODO: calculate inference metric only on s1 instead of combination of s1, s2, s3
+# TODO: control save_freq
+# TODO: add cross entropy in training
+
 
 def main(config):
     logger = config.get_logger("train")

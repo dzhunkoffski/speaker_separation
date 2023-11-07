@@ -213,6 +213,14 @@ class SpeakerExtractor(nn.Module):
         )
         return mask_short, mask_middle, mask_long
 
+class SpeakerClassifier(nn.Module):
+    def __init__(self, speaker_embed_dim: int, n_speakers: int):
+        self.linear = nn.Linear(speaker_embed_dim, n_speakers)
+    
+    def forward(self, x):
+        x = self.linear(x)
+        return x
+
 
 class SpexPlus(BaseModel):
     def __init__(
@@ -247,7 +255,7 @@ class SpexPlus(BaseModel):
             n_tcn_stacks=n_tcn_stacks, n_tcn_blocks_in_stack=n_tcn_blocks_in_stack
         )
 
-        # TODO: maybe should apply different kernel size
+        # FIXME: maybe should apply different kernel size
         self.decoder_short = nn.ConvTranspose1d(
             in_channels=n_encoder_filters, out_channels=1, 
             kernel_size=int(L1 * sr), stride=int(L1 * sr // 2)

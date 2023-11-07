@@ -14,7 +14,6 @@ class SpexLoss(nn.Module):
         self.short_sisdr = ScaleInvariantSignalDistortionRatio()
         self.middle_sisdr = ScaleInvariantSignalDistortionRatio()
         self.long_sisdr = ScaleInvariantSignalDistortionRatio()
-        # TODO: CrossEntropy
 
     def forward(self, s1: torch.Tensor, s2: torch.Tensor, s3: torch.Tensor, target: torch.Tensor, **batch):
         a = (1 - self.alpha - self.beta) * self.short_sisdr(s1, target)
