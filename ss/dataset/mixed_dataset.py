@@ -52,6 +52,16 @@ class LibriSpeechMixedDataset(Dataset):
         self.mixes_files = sorted(glob(os.path.join(path_mixtures, '*-mixed.wav')))[:n_mixes]
         self.target_files = sorted(glob(os.path.join(path_mixtures, '*-target.wav')))[:n_mixes]
 
+        collector = []
+        for file_path in self.mixes_files:
+            target_id, _ = self._extract_ids(file_path)
+            collector.append(target_id)
+
+        self.target_code2target_ids = list(set(collector))
+        self.target_ids2target_code = {}
+        for ix, target_id in enumerate(self.target_code2target_ids):
+            self.target_ids2target_code[target_id] = ix
+
         self.config_parser = config_parser
 
         assert len(self.reference_files) == len(self.mixes_files) and len(self.mixes_files) == len(self.target_files)
@@ -86,6 +96,6 @@ class LibriSpeechMixedDataset(Dataset):
             'reference': ref_audio,
             'mix': mix_audio,
             'target': target_audio,
-            'target_id': target_id,
-            'noise_id': noise_id
+            'target_id': self.target_ids2target_code[target_id],
+            'noise_id': noise_id,
         }

@@ -215,6 +215,7 @@ class SpeakerExtractor(nn.Module):
 
 class SpeakerClassifier(nn.Module):
     def __init__(self, speaker_embed_dim: int, n_speakers: int):
+        super().__init__()
         self.linear = nn.Linear(speaker_embed_dim, n_speakers)
     
     def forward(self, x):
@@ -225,7 +226,7 @@ class SpeakerClassifier(nn.Module):
 class SpexPlus(BaseModel):
     def __init__(
             self, sr: int, n_encoder_filters: int, speaker_embed_dim: int, n_resnets: int, 
-            O: int, Q: int, P: int, n_tcn_stacks: int, n_tcn_blocks_in_stack: int
+            O: int, Q: int, P: int, n_tcn_stacks: int, n_tcn_blocks_in_stack: int, n_speakers: int = 0, use_speaker_class = False
             ):
         """
         :param n_encoder_filters: out_channels value for CNNs in speech encoder
@@ -270,7 +271,16 @@ class SpexPlus(BaseModel):
         )
         self.activasion = nn.ReLU()
 
-    def forward(self, mix, reference, **batch):
+        self.n_speakers = n_speakers
+        if n_speakers > 0 and use_speaker_class:
+            self.speaker_clf = SpeakerClassifier(
+                speaker_embed_dim=speaker_embed_dim, n_speakers=n_speakers
+            )
+        else:
+            self.n_speakers = 0
+
+
+    def forward(self, mix, reference, is_train: bool, **batch):
         # mix = input['mix']
         # ref = input['reference']
 
@@ -282,6 +292,11 @@ class SpexPlus(BaseModel):
         speaker_embedding = torch.cat((speaker_embedding1, speaker_embedding2, speaker_embedding3), dim=1)
         speaker_embedding = self.activasion(speaker_embedding)
         speaker_embedding = self.speaker_encoder(speaker_embedding)
+
+        speaker_logits = None
+        if self.n_speakers > 0 and is_train:
+            speaker_logits = self.speaker_clf(speaker_embedding)
+
 
         mask_short, mask_middle, mask_long = self.speaker_extractor(mix_features, speaker_embedding)
         short_features = torch.mul(short_features, mask_short)
@@ -297,6 +312,4 @@ class SpexPlus(BaseModel):
         middle_features = nn.functional.pad(middle_features, pad=(0, mix.size()[-1] - middle_features.size()[-1]), mode='constant', value=0)
         long_features = nn.functional.pad(long_features, pad=(0, mix.size()[-1] - long_features.size()[-1]), mode='constant', value=0)
 
-        return {'s1': short_features, 's2': middle_features, 's3': long_features}
-
-
+        return {'s1': short_features, 's2': middle_features, 's3': long_features, 'sp_logits': speaker_logits}

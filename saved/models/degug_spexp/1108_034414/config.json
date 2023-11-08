@@ -1,0 +1,128 @@
+{
+    "name": "degug_spexp",
+    "n_gpu": 1,
+    "preprocessing": {
+        "sr": 16000,
+        "spectrogram": {},
+        "log_spec": true
+    },
+    "augmentations": {
+        "wave": [],
+        "spectrogram": []
+    },
+    "arch": {
+        "type": "SpexPlus",
+        "args": {
+            "sr": 16000,
+            "n_encoder_filters": 128,
+            "speaker_embed_dim": 128,
+            "n_resnets": 2,
+            "O": 32,
+            "Q": 3,
+            "P": 32,
+            "n_tcn_stacks": 2,
+            "n_tcn_blocks_in_stack": 2,
+            "use_speaker_class": true
+        }
+    },
+    "data": {
+        "train": {
+            "batch_size": 10,
+            "num_workers": 4,
+            "datasets": [
+                {
+                    "type": "LibriSpeechMixedDataset",
+                    "args": {
+                        "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other",
+                        "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean",
+                        "snr_levels": [
+                            -5,
+                            0,
+                            5
+                        ],
+                        "trim_db": 20,
+                        "vad_db": 20,
+                        "audio_len": 4,
+                        "n_mixes": 10,
+                        "premixed": true
+                    }
+                }
+            ]
+        },
+        "val": {
+            "batch_size": 10,
+            "num_workers": 4,
+            "datasets": [
+                {
+                    "type": "LibriSpeechMixedDataset",
+                    "args": {
+                        "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other",
+                        "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean",
+                        "snr_levels": [
+                            -5,
+                            0,
+                            5
+                        ],
+                        "trim_db": 20,
+                        "vad_db": 20,
+                        "audio_len": 4,
+                        "n_mixes": 10,
+                        "premixed": true
+                    }
+                }
+            ]
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.001
+        }
+    },
+    "loss": {
+        "type": "SpexLoss",
+        "args": {
+            "alpha": 0.1,
+            "beta": 0.1,
+            "gamma": 0.5
+        }
+    },
+    "metrics": [
+        {
+            "type": "PESQ",
+            "args": {
+                "sampling_frequency": 16000,
+                "mode": "wb",
+                "epoch_freq": 5
+            }
+        },
+        {
+            "type": "EvalSISDR",
+            "args": {
+                "epoch_freq": 1
+            }
+        }
+    ],
+    "lr_scheduler": {
+        "type": "OneCycleLR",
+        "args": {
+            "steps_per_epoch": 50,
+            "epochs": 100,
+            "anneal_strategy": "cos",
+            "max_lr": 0.001,
+            "pct_start": 0.07
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "saved/",
+        "save_period": 3,
+        "verbosity": 1,
+        "monitor": "min val_loss",
+        "early_stop": 100,
+        "visualize": "wandb",
+        "wandb_project": "speaker_separation",
+        "len_epoch": 50,
+        "grad_norm_clip": 100
+    }
+}

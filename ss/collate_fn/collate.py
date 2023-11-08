@@ -30,6 +30,7 @@ def collate_fn(dataset_items: List[dict]):
     mix_audio_batch = torch.permute(pad_sequence(mix_audio_batch, batch_first=True, padding_value=0), (0, 2, 1))
     ref_audio_batch = torch.permute(pad_sequence(ref_audio_batch, batch_first=True, padding_value=0), (0, 2, 1))
     target_audio_batch = torch.permute(pad_sequence(target_audio_batch, batch_first=True, padding_value=0), (0, 2, 1))
+    target_id_batch = torch.tensor(target_id_batch)
 
     return {
         'mix_path': mix_audio_path_batch,

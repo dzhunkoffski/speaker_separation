@@ -1,0 +1,166 @@
+wandb_version: 1
+
+name:
+  desc: null
+  value: spexp
+n_gpu:
+  desc: null
+  value: 1
+preprocessing:
+  desc: null
+  value:
+    sr: 16000
+    spectrogram: {}
+    log_spec: true
+augmentations:
+  desc: null
+  value:
+    wave:
+    - type: PitchShift
+      args:
+        n_steps: 4
+        sample_rate: 16000
+        p: 0.2
+    - type: GaussianNoise
+      args:
+        alpha: 1.0
+        mean: 0.1
+        std: 0.01
+        p: 0.2
+    - type: SpeedPerturbation
+      args:
+        p: 0.2
+        orig_freq: 16000
+        factors:
+        - 0.5
+        - 0.75
+        - 1.25
+        - 1.5
+    spectrogram: []
+arch:
+  desc: null
+  value:
+    type: SpexPlus
+    args:
+      sr: 16000
+      n_encoder_filters: 128
+      speaker_embed_dim: 256
+      n_resnets: 3
+      O: 256
+      Q: 3
+      P: 256
+      n_tcn_stacks: 4
+      n_tcn_blocks_in_stack: 8
+      use_speaker_class: true
+      n_speakers: 40
+data:
+  desc: null
+  value:
+    train:
+      batch_size: 10
+      num_workers: 4
+      datasets:
+      - type: LibriSpeechMixedDataset
+        args:
+          speakers_dataset: /home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100
+          path_mixtures: /home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean
+          snr_levels:
+          - -5
+          - -2.5
+          - 0
+          - 1
+          trim_db: 20
+          vad_db: 20
+          audio_len: 4
+          n_mixes: 25000
+          premixed: true
+    val:
+      batch_size: 10
+      num_workers: 4
+      datasets:
+      - type: LibriSpeechMixedDataset
+        args:
+          speakers_dataset: /home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-clean
+          path_mixtures: /home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean
+          snr_levels:
+          - 0
+          trim_db: 20
+          vad_db: 20
+          audio_len: 4
+          n_mixes: 1000
+          premixed: true
+optimizer:
+  desc: null
+  value:
+    type: Adam
+    args:
+      lr: 0.0006
+loss:
+  desc: null
+  value:
+    type: SpexLoss
+    args:
+      alpha: 0.1
+      beta: 0.1
+      gamma: 0.5
+metrics:
+  desc: null
+  value:
+  - type: PESQ
+    args:
+      sampling_frequency: 16000
+      mode: wb
+      epoch_freq: 5
+  - type: EvalSISDR
+    args:
+      epoch_freq: 1
+lr_scheduler:
+  desc: null
+  value:
+    type: OneCycleLR
+    args:
+      steps_per_epoch: 500
+      epochs: 100
+      anneal_strategy: cos
+      max_lr: 0.0003
+      pct_start: 0.05
+trainer:
+  desc: null
+  value:
+    epochs: 100
+    save_dir: saved/
+    save_period: 5
+    verbosity: 1
+    monitor: min val_loss
+    early_stop: 100
+    visualize: wandb
+    wandb_project: speaker_separation
+    len_epoch: 500
+    grad_norm_clip: 100
+_wandb:
+  desc: null
+  value:
+    python_version: 3.10.12
+    cli_version: 0.15.12
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1699404459.885533
+    t:
+      1:
+      - 1
+      - 41
+      - 55
+      2:
+      - 1
+      - 41
+      - 55
+      3:
+      - 16
+      - 23
+      4: 3.10.12
+      5: 0.15.12
+      8:
+      - 2
+      - 5
+      13: linux-x86_64

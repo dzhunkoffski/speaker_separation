@@ -61,7 +61,7 @@ class Trainer(BaseTrainer):
         """
         Move all necessary tensors to the HPU
         """
-        for tensor_for_gpu in ["reference", "mix", "target"]:
+        for tensor_for_gpu in ["reference", "mix", "target", "target_id"]:
             batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
         return batch
 
@@ -134,7 +134,7 @@ class Trainer(BaseTrainer):
         batch = self.move_batch_to_device(batch, self.device)
         if is_train:
             self.optimizer.zero_grad()
-        outputs = self.model(**batch)
+        outputs = self.model(**batch, is_train=is_train)
         batch.update(outputs)
         batch["loss"] = self.criterion(**batch)
         if is_train:
@@ -211,8 +211,7 @@ class Trainer(BaseTrainer):
             mix_audio = wandb.Audio(_mix.squeeze().cpu().detach().numpy(), sample_rate=16000)
             target_audio = wandb.Audio(_target.squeeze().cpu().detach().numpy(), sample_rate=16000)
             pred_audio = wandb.Audio(_raw_pred.squeeze().cpu().detach().numpy(), sample_rate=16000)
-
-            _loss = self.criterion(s1,s2,s3,target).item()
+            _loss = self.criterion(s1=s1,s2=s2,s3=s3,target=target,**kwargs).item()
 
             rows[Path(_mix_path).name] = {
                 "mix": mix_audio,

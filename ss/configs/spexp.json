@@ -40,14 +40,15 @@
         "type": "SpexPlus",
         "args": {
             "sr": 16000,
-            "n_encoder_filters": 256,
+            "n_encoder_filters": 128,
             "speaker_embed_dim": 256,
             "n_resnets": 3,
             "O": 256,
             "Q": 3,
             "P": 256,
             "n_tcn_stacks": 4,
-            "n_tcn_blocks_in_stack": 8
+            "n_tcn_blocks_in_stack": 8,
+            "use_speaker_class": true
         }
     },
     "data": {
@@ -60,7 +61,7 @@
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100",
                         "path_mixtures": "/kaggle/input/speaker-mixes/train-clean-100",
-                        "snr_levels": [-5, -2.5, 0, 2.5, 5],
+                        "snr_levels": [-5, -2.5, 0, 1],
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
@@ -93,17 +94,33 @@
     "optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 3e-4
+            "lr": 6e-4
         }
     },
     "loss": {
         "type": "SpexLoss",
         "args": {
             "alpha": 0.1,
-            "beta": 0.1
+            "beta": 0.1,
+            "gamma": 0.5
         }
     },
-    "metrics": [],
+    "metrics": [
+        {
+            "type": "PESQ",
+            "args": {
+                "sampling_frequency": 16000,
+                "mode": "wb",
+                "epoch_freq": 5
+            }
+        },
+        {
+            "type": "EvalSISDR",
+            "args": {
+                "epoch_freq": 2
+            }
+        }
+    ],
     "lr_scheduler": {
         "type": "OneCycleLR",
         "args": {

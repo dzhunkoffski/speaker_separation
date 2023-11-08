@@ -22,8 +22,6 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
-# TODO: PESQ metric
-# TODO: calculate inference metric only on s1 instead of combination of s1, s2, s3
 # TODO: control save_freq
 # TODO: add cross entropy in training
 
@@ -34,6 +32,7 @@ def main(config):
     # setup data_loader instances
     dataloaders = get_dataloaders(config)
 
+    config['arch']['args']['n_speakers'] = len(dataloaders['train'].dataset.target_code2target_ids)
     # build model architecture, then print to console
     model = config.init_obj(config["arch"], module_arch)
     logger.info(model)

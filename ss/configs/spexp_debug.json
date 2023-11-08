@@ -21,7 +21,8 @@
             "Q": 3,
             "P": 32,
             "n_tcn_stacks": 2,
-            "n_tcn_blocks_in_stack": 2
+            "n_tcn_blocks_in_stack": 2,
+            "use_speaker_class": true
         }
     },
     "data": {
@@ -74,7 +75,8 @@
         "type": "SpexLoss",
         "args": {
             "alpha": 0.1,
-            "beta": 0.1
+            "beta": 0.1,
+            "gamma": 0.5
         }
     },
     "metrics": [
