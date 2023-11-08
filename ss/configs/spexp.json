@@ -61,7 +61,7 @@
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100",
                         "path_mixtures": "/kaggle/input/speaker-mixes/train-clean-100",
-                        "snr_levels": [-5, -2.5, 0, 1],
+                        "snr_levels": [-5, -2.5, 0, 2.5, 5],
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
@@ -111,13 +111,13 @@
             "args": {
                 "sampling_frequency": 16000,
                 "mode": "wb",
-                "epoch_freq": 5
+                "epoch_freq": 10
             }
         },
         {
             "type": "EvalSISDR",
             "args": {
-                "epoch_freq": 2
+                "epoch_freq": 3
             }
         }
     ],
