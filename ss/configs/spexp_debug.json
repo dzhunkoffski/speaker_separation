@@ -93,6 +93,12 @@
             "args": {
                 "epoch_freq": 1
             }
+        },
+        {
+            "type": "CrossEntropy",
+            "args": {
+                "epoch_freq": 3
+            }
         }
     ],
     "lr_scheduler": {
