@@ -13,7 +13,7 @@
                 "args": {
                     "n_steps": 4,
                     "sample_rate": 16000,
-                    "p": 0.5
+                    "p": 0.3
                 }
             },
             {
@@ -28,7 +28,7 @@
             {
                 "type": "SpeedPerturbation",
                 "args": {
-                    "p": 0.5,
+                    "p": 0.3,
                     "orig_freq": 16000,
                     "factors": [0.5, 0.75, 1.25, 1.5]
                 }
