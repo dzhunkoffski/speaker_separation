@@ -310,10 +310,10 @@ class SpexPlus(BaseModel):
         long_features = self.decoder_long(long_features)
 
         # FIXME: different lengths
-        print('mix:', mix.size())
-        print('short:', short_features.size())
-        print('middle:', middle_features.size())
-        print('long:', long_features.size())
+        # print('mix:', mix.size())
+        # print('short:', short_features.size())
+        # print('middle:', middle_features.size())
+        # print('long:', long_features.size())
 
         short_features = nn.functional.pad(short_features, pad=(0, mix.size()[-1] - short_features.size()[-1]), mode='constant', value=0)
         middle_features = nn.functional.pad(middle_features, pad=(0, mix.size()[-1] - middle_features.size()[-1]), mode='constant', value=0)

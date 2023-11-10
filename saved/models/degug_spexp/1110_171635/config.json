@@ -35,7 +35,11 @@
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other",
                         "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean",
-                        "snr_levels": [-5, 0, 5],
+                        "snr_levels": [
+                            -5,
+                            0,
+                            5
+                        ],
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
@@ -54,7 +58,11 @@
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-other",
                         "path_mixtures": "/home/dzhunk/University/dl-audio/speaker_separation/data/mixes/test-clean",
-                        "snr_levels": [-5, 0, 5],
+                        "snr_levels": [
+                            -5,
+                            0,
+                            5
+                        ],
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
@@ -68,7 +76,7 @@
     "optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 1e-3
+            "lr": 0.001
         }
     },
     "loss": {
@@ -109,7 +117,7 @@
             "patience": 2,
             "cooldown": 1
         }
-      },
+    },
     "trainer": {
         "epochs": 100,
         "save_dir": "saved/",

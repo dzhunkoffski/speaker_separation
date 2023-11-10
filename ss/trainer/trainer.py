@@ -109,9 +109,14 @@ class Trainer(BaseTrainer):
                         epoch, self._progress(batch_idx), batch["loss"].item()
                     )
                 )
-                self.writer.add_scalar(
-                    "learning rate", self.lr_scheduler.get_last_lr()[0]
-                )
+                if not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                    self.writer.add_scalar(
+                        "learning rate", self.lr_scheduler.get_last_lr()[0]
+                    )
+                else:
+                    self.writer.add_scalar(
+                        "learning rate", self.optimizer.param_groups[0]['lr']
+                    ) 
                 self._log_predictions(**batch)
                 # TODO:
                 # self._log_spectrogram(batch["spectrogram"])
@@ -141,12 +146,15 @@ class Trainer(BaseTrainer):
             batch["loss"].backward()
             self._clip_grad_norm()
             self.optimizer.step()
-            if self.lr_scheduler is not None:
+            if self.lr_scheduler is not None and not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 self.lr_scheduler.step()
+        
+        if not is_train and self.lr_scheduler is not None and isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+            self.lr_scheduler.step(batch['loss'])
 
         metrics.update("loss", batch["loss"].item())
         for met in self.metrics:
-            metrics.update(met.name, met(epoch=epoch, **batch))
+            metrics.update(met.name, met(epoch=epoch, **batch, n=batch['target'].size()[0]))
         return batch
 
     def _evaluation_epoch(self, epoch, part, dataloader):
