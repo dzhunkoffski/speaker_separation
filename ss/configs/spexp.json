@@ -53,8 +53,8 @@
     },
     "data": {
         "train": {
-            "batch_size": 5,
-            "num_workers": 4,
+            "batch_size": 4,
+            "num_workers": 3,
             "datasets": [
                 {
                     "type": "LibriSpeechMixedDataset",
@@ -72,8 +72,8 @@
             ]
         },
         "val": {
-            "batch_size": 5,
-            "num_workers": 4,
+            "batch_size": 4,
+            "num_workers": 3,
             "datasets": [
                 {
                     "type": "LibriSpeechMixedDataset",
@@ -117,13 +117,13 @@
         {
             "type": "EvalSISDR",
             "args": {
-                "epoch_freq": 1
+                "epoch_freq": 3
             }
         },
         {
             "type": "CrossEntropy",
             "args": {
-                "epoch_freq": 1
+                "epoch_freq": 2
             }
         }
     ],
