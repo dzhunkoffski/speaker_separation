@@ -132,6 +132,7 @@
         }
       },
     "trainer": {
+        "kaggle_account": "amogususus",
         "epochs": 100,
         "save_dir": "saved/",
         "save_period": 5,
