@@ -53,7 +53,7 @@ class Trainer(BaseTrainer):
             "loss", "grad norm", *[m.name for m in self.metrics], writer=self.writer
         )
         self.evaluation_metrics = MetricTracker(
-            "loss", *[m.name for m in self.metrics], writer=self.writer
+            "loss", *[m.name for m in self.metrics if m.name != 'CrossEntropy'], writer=self.writer
         )
 
     @staticmethod
@@ -149,11 +149,10 @@ class Trainer(BaseTrainer):
             if self.lr_scheduler is not None and not isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 self.lr_scheduler.step()
         
-        if not is_train and self.lr_scheduler is not None and isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-            self.lr_scheduler.step(batch['loss'])
-
         metrics.update("loss", batch["loss"].item())
         for met in self.metrics:
+            if not is_train and met.name == 'CrossEntropy':
+                continue
             metrics.update(met.name, met(epoch=epoch, **batch, n=batch['target'].size()[0]))
         return batch
 
@@ -181,8 +180,9 @@ class Trainer(BaseTrainer):
             self.writer.set_step(epoch * self.len_epoch, part)
             self._log_scalars(self.evaluation_metrics)
             self._log_predictions(**batch)
-            # TODO:
-            # self._log_spectrogram(batch["spectrogram"])
+        
+        if self.lr_scheduler is not None and isinstance(self.lr_scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+            self.lr_scheduler.step(batch['loss'])
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
