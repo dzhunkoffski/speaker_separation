@@ -22,8 +22,6 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
-from omegaconf import DictConfig, OmegaConf
-import hydra
 
 def main(config):
     logger = config.get_logger("train")
