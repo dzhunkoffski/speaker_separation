@@ -10,7 +10,7 @@ from pathlib import Path
 from ss.logger import setup_logging
 from ss.utils import read_json, write_json, ROOT_PATH
 
-class ConfigParserOld:
+class ConfigParser:
     def __init__(self, config, resume=None, modification=None, run_id=None):
         """
         class to parse configuration json file. Handles hyperparameters for training,
