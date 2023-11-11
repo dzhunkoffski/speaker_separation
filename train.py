@@ -22,9 +22,8 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 np.random.seed(SEED)
 
-# TODO: control save_freq
-# TODO: add cross entropy in training
-
+from omegaconf import DictConfig, OmegaConf
+import hydra
 
 def main(config):
     logger = config.get_logger("train")
@@ -69,7 +68,6 @@ def main(config):
     )
 
     trainer.train()
-
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="PyTorch Template")

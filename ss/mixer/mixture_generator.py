@@ -57,6 +57,8 @@ def create_mix(idx, triplet, snr_levels, out_dir, test=False, sr=16000, **kwargs
 
     s1, _ = sf.read(os.path.join('', s1_path))
     s2, _ = sf.read(os.path.join('', s2_path))
+    if len(s2.shape) > 1:
+        s2 = s2[:, 0]
     ref, _ = sf.read(os.path.join('', ref_path))
 
     meter = pyln.Meter(sr)

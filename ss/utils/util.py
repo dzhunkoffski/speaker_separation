@@ -26,6 +26,10 @@ def write_json(content, fname):
     with fname.open("wt") as handle:
         json.dump(content, handle, indent=4, sort_keys=False)
 
+def read_yaml(fname):
+    fname = Path(fname)
+    
+
 
 def inf_loop(data_loader):
     """wrapper function for endless data loader."""
