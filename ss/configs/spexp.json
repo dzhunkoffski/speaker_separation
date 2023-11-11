@@ -45,7 +45,7 @@
             "n_resnets": 3,
             "O": 256,
             "Q": 3,
-            "P": 512,
+            "P": 256,
             "n_tcn_stacks": 4,
             "n_tcn_blocks_in_stack": 8,
             "use_speaker_class": true
@@ -53,8 +53,8 @@
     },
     "data": {
         "train": {
-            "batch_size": 5,
-            "num_workers": 3,
+            "batch_size": 10,
+            "num_workers": 4,
             "datasets": [
                 {
                     "type": "LibriSpeechMixedDataset",
@@ -72,8 +72,8 @@
             ]
         },
         "val": {
-            "batch_size": 4,
-            "num_workers": 3,
+            "batch_size": 5,
+            "num_workers": 4,
             "datasets": [
                 {
                     "type": "LibriSpeechMixedDataset",
