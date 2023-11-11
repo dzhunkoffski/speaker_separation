@@ -13,7 +13,7 @@
                 "args": {
                     "n_steps": 4,
                     "sample_rate": 16000,
-                    "p": 0.3
+                    "p": 0.25
                 }
             },
             {
@@ -28,7 +28,7 @@
             {
                 "type": "SpeedPerturbation",
                 "args": {
-                    "p": 0.3,
+                    "p": 0.25,
                     "orig_freq": 16000,
                     "factors": [0.5, 0.75, 1.25, 1.5]
                 }
@@ -40,7 +40,7 @@
         "type": "SpexPlus",
         "args": {
             "sr": 16000,
-            "n_encoder_filters": 256,
+            "n_encoder_filters": 128,
             "speaker_embed_dim": 256,
             "n_resnets": 3,
             "O": 256,
@@ -53,7 +53,7 @@
     },
     "data": {
         "train": {
-            "batch_size": 4,
+            "batch_size": 5,
             "num_workers": 3,
             "datasets": [
                 {
@@ -94,7 +94,7 @@
     "optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 6e-4
+            "lr": 1e-3
         }
     },
     "loss": {
@@ -117,7 +117,7 @@
         {
             "type": "EvalSISDR",
             "args": {
-                "epoch_freq": 3
+                "epoch_freq": 2
             }
         },
         {
@@ -137,7 +137,7 @@
         }
       },
     "trainer": {
-        "kaggle_account": "amogususus",
+        "kaggle_account": "dzhunkoffski",
         "epochs": 100,
         "save_dir": "saved/",
         "save_period": 5,
