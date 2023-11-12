@@ -53,27 +53,26 @@
     },
     "data": {
         "train": {
-            "batch_size": 3,
+            "batch_size": 10,
             "num_workers": 4,
             "datasets": [
                 {
                     "type": "LibriSpeechMixedDataset",
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100",
-                        "path_mixtures": "/kaggle/input/speaker-mixes/ncut-train-clean-100/ncut-train-clean-100",
-                        "snr_levels": [-1, 0, 1],
+                        "path_mixtures": "/kaggle/input/speaker-mixes/train-clean-100",
+                        "snr_levels": [-5, -2.5, 0, 2.5, 5],
                         "trim_db": 20,
                         "vad_db": 20,
-                        "audio_len": 3,
-                        "n_mixes": 12000,
+                        "audio_len": 4,
+                        "n_mixes": 25000,
                         "premixed": true,
-                        "not_cut": true
                     }
                 }
             ]
         },
         "val": {
-            "batch_size": 3,
+            "batch_size": 10,
             "num_workers": 4,
             "datasets": [
                 {
@@ -112,7 +111,7 @@
             "args": {
                 "sampling_frequency": 16000,
                 "mode": "wb",
-                "epoch_freq": 10
+                "epoch_freq": 20
             }
         },
         {
