@@ -60,7 +60,7 @@
                     "type": "LibriSpeechMixedDataset",
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100",
-                        "path_mixtures": "/kaggle/input/speaker-mixes//ncut-train-clean-100",
+                        "path_mixtures": "/kaggle/input/speaker-mixes/ncut-train-clean-100",
                         "snr_levels": [-1, 0, 1],
                         "trim_db": 20,
                         "vad_db": 20,
