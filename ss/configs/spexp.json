@@ -66,7 +66,7 @@
                         "vad_db": 20,
                         "audio_len": 4,
                         "n_mixes": 25000,
-                        "premixed": true,
+                        "premixed": true
                     }
                 }
             ]
