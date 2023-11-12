@@ -24,6 +24,7 @@ class LibriSpeechMixedDataset(Dataset):
             audio_template: str = '*.flac',
             update_steps: int = 100,
             premixed: bool = False,
+            not_cut: bool = False,
             config_parser: ConfigParser = None,
             wave_augs: callable = None,
             spec_augs: callable = None
@@ -36,7 +37,7 @@ class LibriSpeechMixedDataset(Dataset):
                 speakers_files=speakers_files,
                 save_mixes_to=path_mixtures,
                 n_files=n_mixes,
-                test= (split != 'train')
+                test = (split != 'train') or not_cut
             )
 
             self.mix_generator.generate_mixers(
