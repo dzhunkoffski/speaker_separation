@@ -164,5 +164,7 @@ data/*
 !data/.gitkeep
 
 # model checkpoints
-checkpoints/*
+*.pth*
+
+# model predictions
 predictions/*

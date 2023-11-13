@@ -1,6 +1,30 @@
 # speaker_separation
 DL-AUDIO homework
 
+## Запуск итогового решения:
+сначала загрузим датасеты:
+```bash
+cd data
+wget https://us.openslr.org/resources/12/test-clean.tar.gz
+tar -xf test-clean.tar.gz
+mkdir librispeech
+mv LibriSpeech/test-clean librispeech/
+rm -r LibriSpeech
+```
+```bash
+cd data
+wget https://us.openslr.org/resources/12/train-clean-100.tar.gz
+tar -xf train-clean-100.tar.gz
+mkdir librispeech
+mv LibriSpeech/train-clean-100 librispeech/
+rm -r LibriSpeech
+cd ..
+```
+теперь запускаем обучение:
+```bash
+
+```
+
 ## Obtain WHAM mixes
 ```bash
 cd data

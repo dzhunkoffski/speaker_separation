@@ -11,7 +11,7 @@
         "spectrogram": []
     },
     "arch": {
-        "type": "SpexPlusOld",
+        "type": "SpexPlus",
         "args": {
             "sr": 16000,
             "n_encoder_filters": 128,
@@ -21,8 +21,7 @@
             "Q": 3,
             "P": 256,
             "n_tcn_stacks": 4,
-            "n_tcn_blocks_in_stack": 8,
-            "use_speaker_class": true
+            "n_tcn_blocks_in_stack": 8
         }
     },
     "data": {
@@ -34,7 +33,7 @@
                     "type": "LibriSpeechMixedDataset",
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100",
-                        "path_mixtures": "data/mixes/train-clean-100",
+                        "path_mixtures": "/kaggle/input/speaker-mixes/train-clean-100",
                         "snr_levels": [
                             -5,
                             -2.5,
@@ -51,15 +50,15 @@
                 }
             ]
         },
-        "test": {
-            "batch_size": 1,
-            "num_workers": 0,
+        "val": {
+            "batch_size": 10,
+            "num_workers": 4,
             "datasets": [
                 {
                     "type": "LibriSpeechMixedDataset",
                     "args": {
-                        "speakers_dataset": "-",
-                        "path_mixtures": "data/mixes/public",
+                        "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-clean",
+                        "path_mixtures": "/kaggle/input/speaker-mixes/test-clean",
                         "snr_levels": [
                             0
                         ],

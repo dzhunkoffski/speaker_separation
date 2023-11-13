@@ -1,0 +1,165 @@
+{
+    "name": "spexp",
+    "n_gpu": 1,
+    "preprocessing": {
+        "sr": 16000,
+        "spectrogram": {},
+        "log_spec": true
+    },
+    "augmentations": {
+        "wave": [
+            {
+                "type": "PitchShift",
+                "args": {
+                    "n_steps": 4,
+                    "sample_rate": 16000,
+                    "p": 0.3
+                }
+            },
+            {
+                "type": "GaussianNoise",
+                "args": {
+                    "alpha": 1.5,
+                    "mean": 0.1,
+                    "std": 0.01,
+                    "p": 0.25
+                }
+            },
+            {
+                "type": "SpeedPerturbation",
+                "args": {
+                    "p": 0.3,
+                    "orig_freq": 16000,
+                    "factors": [
+                        0.5,
+                        0.75,
+                        1.25,
+                        1.5
+                    ]
+                }
+            }
+        ],
+        "spectrogram": []
+    },
+    "arch": {
+        "type": "SpexPlus",
+        "args": {
+            "sr": 16000,
+            "n_encoder_filters": 256,
+            "speaker_embed_dim": 256,
+            "n_resnets": 3,
+            "O": 256,
+            "Q": 3,
+            "P": 512,
+            "n_tcn_stacks": 4,
+            "n_tcn_blocks_in_stack": 8,
+            "use_speaker_class": true
+        }
+    },
+    "data": {
+        "train": {
+            "batch_size": 4,
+            "num_workers": 3,
+            "datasets": [
+                {
+                    "type": "LibriSpeechMixedDataset",
+                    "args": {
+                        "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100",
+                        "path_mixtures": "/kaggle/input/speaker-mixes/train-clean-100",
+                        "snr_levels": [
+                            -5,
+                            -2.5,
+                            0,
+                            2.5,
+                            5
+                        ],
+                        "trim_db": 20,
+                        "vad_db": 20,
+                        "audio_len": 4,
+                        "n_mixes": 25000,
+                        "premixed": true
+                    }
+                }
+            ]
+        },
+        "val": {
+            "batch_size": 4,
+            "num_workers": 3,
+            "datasets": [
+                {
+                    "type": "LibriSpeechMixedDataset",
+                    "args": {
+                        "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-clean",
+                        "path_mixtures": "/kaggle/input/speaker-mixes/test-clean",
+                        "snr_levels": [
+                            0
+                        ],
+                        "trim_db": 20,
+                        "vad_db": 20,
+                        "audio_len": 4,
+                        "n_mixes": 1000,
+                        "premixed": true
+                    }
+                }
+            ]
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args": {
+            "lr": 0.0006
+        }
+    },
+    "loss": {
+        "type": "SpexLoss",
+        "args": {
+            "alpha": 0.1,
+            "beta": 0.1,
+            "gamma": 0.5
+        }
+    },
+    "metrics": [
+        {
+            "type": "PESQ",
+            "args": {
+                "sampling_frequency": 16000,
+                "mode": "wb",
+                "epoch_freq": 10
+            }
+        },
+        {
+            "type": "EvalSISDR",
+            "args": {
+                "epoch_freq": 3
+            }
+        },
+        {
+            "type": "CrossEntropy",
+            "args": {
+                "epoch_freq": 1
+            }
+        }
+    ],
+    "lr_scheduler": {
+        "type": "ReduceLROnPlateau",
+        "args": {
+            "mode": "min",
+            "factor": 0.5,
+            "patience": 2,
+            "cooldown": 1
+        }
+    },
+    "trainer": {
+        "kaggle_account": "amogususus",
+        "epochs": 100,
+        "save_dir": "saved/",
+        "save_period": 5,
+        "verbosity": 1,
+        "monitor": "min val_loss",
+        "early_stop": 100,
+        "visualize": "wandb",
+        "wandb_project": "speaker_separation",
+        "len_epoch": 500,
+        "grad_norm_clip": 100
+    }
+}
