@@ -22,17 +22,15 @@ class SpeechEncoder(nn.Module):
 
         self.encoder_short = nn.Conv1d(
             in_channels=1, out_channels=n_filters, 
-            kernel_size=int(L1 * sr), stride=self.stride
+            kernel_size=int(L1 * sr), stride=int(L1 * sr // 2),
         )
         self.encoder_middle = nn.Conv1d(
             in_channels=1, out_channels=n_filters,
-            kernel_size=int(L2 * sr), stride=self.stride,
-            padding=(self.kernel_size2 - self.kernel_size1) // 2
+            kernel_size=int(L2 * sr), stride=int(L1 * sr // 2),
         )
         self.encoder_long = nn.Conv1d(
             in_channels=1, out_channels=n_filters,
-            kernel_size=int(L3 * sr), stride=self.stride,
-            padding=(self.kernel_size3 - self.kernel_size1) // 2
+            kernel_size=int(L3 * sr), stride=int(L1 * sr // 2),
         )
         self.activasion = nn.ReLU()
     
@@ -47,6 +45,8 @@ class SpeechEncoder(nn.Module):
         middle_len = _get_out_seq_len(input_len=audio.size()[-1], kernel_size=self.kernel_size2, stride=self.stride)
         long_len = _get_out_seq_len(input_len=audio.size()[-1], kernel_size=self.kernel_size3, stride=self.stride)
 
+        middle_features = nn.functional.pad(middle_features, pad=(0, short_len - middle_len), mode='constant', value=0)
+        long_features = nn.functional.pad(long_features, pad=(0, short_len - long_len), mode='constant', value=0)
         return short_features, middle_features, long_features
 
 class ResNetBlock(nn.Module):
@@ -223,7 +223,7 @@ class SpeakerClassifier(nn.Module):
         return x
 
 
-class SpexPlus(BaseModel):
+class SpexPlusOld(BaseModel):
     def __init__(
             self, sr: int, n_encoder_filters: int, speaker_embed_dim: int, n_resnets: int, 
             O: int, Q: int, P: int, n_tcn_stacks: int, n_tcn_blocks_in_stack: int, n_speakers: int = 0, use_speaker_class = False
@@ -263,13 +263,11 @@ class SpexPlus(BaseModel):
         )
         self.decoder_middle = nn.ConvTranspose1d(
             in_channels=n_encoder_filters, out_channels=1,
-            kernel_size=int(L2 * sr), stride=int(L1 * sr // 2),
-            padding=(int(L2 * sr) - int(L1 * sr)) // 2
+            kernel_size=int(L1 * sr), stride=int(L1 * sr // 2)
         )
         self.decoder_long = nn.ConvTranspose1d(
             in_channels=n_encoder_filters, out_channels=1,
-            kernel_size=int(L3 * sr), stride=int(L1 * sr // 2),
-            padding=(int(L3 * sr) - int(L1 * sr)) // 2
+            kernel_size=int(L1 * sr), stride=int(L1 * sr // 2)
         )
         self.activasion = nn.ReLU()
 
@@ -310,14 +308,8 @@ class SpexPlus(BaseModel):
         long_features = self.decoder_long(long_features)
 
         # FIXME: different lengths
-        # print('mix:', mix.size())
-        # print('short:', short_features.size())
-        # print('middle:', middle_features.size())
-        # print('long:', long_features.size())
-
         short_features = nn.functional.pad(short_features, pad=(0, mix.size()[-1] - short_features.size()[-1]), mode='constant', value=0)
         middle_features = nn.functional.pad(middle_features, pad=(0, mix.size()[-1] - middle_features.size()[-1]), mode='constant', value=0)
         long_features = nn.functional.pad(long_features, pad=(0, mix.size()[-1] - long_features.size()[-1]), mode='constant', value=0)
 
         return {'s1': short_features, 's2': middle_features, 's3': long_features, 'sp_logits': speaker_logits}
-

@@ -12,6 +12,9 @@ from ss.utils import ROOT_PATH
 from ss.utils.object_loading import get_dataloaders
 from ss.utils.parse_config import ConfigParser
 
+from torchmetrics.audio import ScaleInvariantSignalDistortionRatio
+from torchmetrics.audio import PerceptualEvaluationSpeechQuality
+
 DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
 
 
@@ -21,14 +24,12 @@ def main(config, out_file):
     # define cpu or gpu if possible
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # text_encoder
-    text_encoder = config.get_text_encoder()
-
     # setup data_loader instances
-    dataloaders = get_dataloaders(config, text_encoder)
+    dataloaders = get_dataloaders(config)
 
     # build model architecture
-    model = config.init_obj(config["arch"], module_model, n_class=len(text_encoder))
+    config['arch']['args']['n_speakers'] = len(dataloaders['train'].dataset.target_code2target_ids)
+    model = config.init_obj(config["arch"], module_model)
     logger.info(model)
 
     logger.info("Loading checkpoint: {} ...".format(config.resume))
@@ -42,36 +43,31 @@ def main(config, out_file):
     model = model.to(device)
     model.eval()
 
-    results = []
+    sisdr = ScaleInvariantSignalDistortionRatio().to(device)
+    pesq = PerceptualEvaluationSpeechQuality(
+            fs=16000, mode='wb'
+    )
+
+    sisdr_metric = 0
+    pesq_metric = 0
 
     with torch.no_grad():
-        for batch_num, batch in enumerate(tqdm(dataloaders["test"])):
-            batch = Trainer.move_batch_to_device(batch, device)
-            output = model(**batch)
-            if type(output) is dict:
-                batch.update(output)
-            else:
-                batch["logits"] = output
-            batch["log_probs"] = torch.log_softmax(batch["logits"], dim=-1)
-            batch["log_probs_length"] = model.transform_input_lengths(
-                batch["spectrogram_length"]
-            )
-            batch["probs"] = batch["log_probs"].exp().cpu()
-            batch["argmax"] = batch["probs"].argmax(-1)
-            for i in range(len(batch["text"])):
-                argmax = batch["argmax"][i]
-                argmax = argmax[: int(batch["log_probs_length"][i])]
-                results.append(
-                    {
-                        "ground_trurh": batch["text"][i],
-                        "pred_text_argmax": text_encoder.ctc_decode(argmax.cpu().numpy()),
-                        "pred_text_beam_search": text_encoder.ctc_beam_search(
-                            batch["probs"][i], batch["log_probs_length"][i], beam_size=100
-                        )[:10],
-                    }
-                )
-    with Path(out_file).open("w") as f:
-        json.dump(results, f, indent=2)
+        for item in tqdm(dataloaders['test'].dataset):
+            mix = item['mix'].to(device).unsqueeze(0)
+            reference = item['reference'].to(device).unsqueeze(0)
+            target = item['target'].to(device).unsqueeze(0)
+            pred = model(mix=mix, reference=reference, is_train=False)
+
+            sisdr_metric += sisdr(pred['s1'], target).item()
+            pesq_metric += pesq(pred['s1'], target).item()
+    
+    sisdr_metric /= len(dataloaders['test'].dataset)
+    pesq_metric /= len(dataloaders['test'].dataset)
+
+    print('SISDR:', sisdr_metric)
+    print('PESQ:', pesq_metric)
+
+
 
 
 if __name__ == "__main__":
