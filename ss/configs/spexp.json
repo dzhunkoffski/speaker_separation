@@ -7,38 +7,7 @@
         "log_spec": true
     },
     "augmentations": {
-        "wave": [
-            {
-                "type": "PitchShift",
-                "args": {
-                    "n_steps": 4,
-                    "sample_rate": 16000,
-                    "p": 0.2
-                }
-            },
-            {
-                "type": "GaussianNoise",
-                "args": {
-                    "alpha": 1.0,
-                    "mean": 0.1,
-                    "std": 0.01,
-                    "p": 0.2
-                }
-            },
-            {
-                "type": "SpeedPerturbation",
-                "args": {
-                    "p": 0.2,
-                    "orig_freq": 16000,
-                    "factors": [
-                        0.5,
-                        0.75,
-                        1.25,
-                        1.5
-                    ]
-                }
-            }
-        ],
+        "wave": [],
         "spectrogram": []
     },
     "arch": {
@@ -52,8 +21,7 @@
             "Q": 3,
             "P": 256,
             "n_tcn_stacks": 4,
-            "n_tcn_blocks_in_stack": 8,
-            "use_speaker_class": true
+            "n_tcn_blocks_in_stack": 8
         }
     },
     "data": {
@@ -76,7 +44,7 @@
                         "trim_db": 20,
                         "vad_db": 20,
                         "audio_len": 4,
-                        "n_mixes": 25000,
+                        "n_mixes": 15000,
                         "premixed": true
                     }
                 }
@@ -107,41 +75,25 @@
     "optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 0.0006
+            "lr": 0.001
         }
     },
     "loss": {
         "type": "SpexLoss",
         "args": {
             "alpha": 0.1,
-            "beta": 0.1,
-            "gamma": 0.5
+            "beta": 0.1
         }
     },
-    "metrics": [
-        {
-            "type": "PESQ",
-            "args": {
-                "sampling_frequency": 16000,
-                "mode": "wb",
-                "epoch_freq": 20
-            }
-        },
-        {
-            "type": "EvalSISDR",
-            "args": {
-                "epoch_freq": 3
-            }
-        }
-    ],
+    "metrics": [],
     "lr_scheduler": {
         "type": "OneCycleLR",
         "args": {
             "steps_per_epoch": 500,
             "epochs": 100,
             "anneal_strategy": "cos",
-            "max_lr": 0.0003,
-            "pct_start": 0.05
+            "max_lr": 0.001,
+            "pct_start": 0.07
         }
     },
     "trainer": {
