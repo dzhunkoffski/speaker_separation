@@ -7,11 +7,42 @@
         "log_spec": true
     },
     "augmentations": {
-        "wave": [],
+        "wave": [
+            {
+                "type": "PitchShift",
+                "args": {
+                    "n_steps": 4,
+                    "sample_rate": 16000,
+                    "p": 0.2
+                }
+            },
+            {
+                "type": "GaussianNoise",
+                "args": {
+                    "alpha": 1.0,
+                    "mean": 0.1,
+                    "std": 0.01,
+                    "p": 0.2
+                }
+            },
+            {
+                "type": "SpeedPerturbation",
+                "args": {
+                    "p": 0.2,
+                    "orig_freq": 16000,
+                    "factors": [
+                        0.5,
+                        0.75,
+                        1.25,
+                        1.5
+                    ]
+                }
+            }
+        ],
         "spectrogram": []
     },
     "arch": {
-        "type": "SpexPlusOld",
+        "type": "SpexPlus",
         "args": {
             "sr": 16000,
             "n_encoder_filters": 128,
@@ -34,7 +65,7 @@
                     "type": "LibriSpeechMixedDataset",
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/train-clean-100",
-                        "path_mixtures": "data/mixes/train-clean-100",
+                        "path_mixtures": "/kaggle/input/speaker-mixes/train-clean-100",
                         "snr_levels": [
                             -5,
                             -2.5,
@@ -46,7 +77,7 @@
                         "vad_db": 20,
                         "audio_len": 4,
                         "n_mixes": 25000,
-                        "premixed": false
+                        "premixed": true
                     }
                 }
             ]
@@ -59,7 +90,7 @@
                     "type": "LibriSpeechMixedDataset",
                     "args": {
                         "speakers_dataset": "/home/dzhunk/University/dl-audio/speaker_separation/data/librispeech/test-clean",
-                        "path_mixtures": "data/mixes/test-clean",
+                        "path_mixtures": "/kaggle/input/speaker-mixes/test-clean",
                         "snr_levels": [
                             0
                         ],
@@ -67,7 +98,7 @@
                         "vad_db": 20,
                         "audio_len": 4,
                         "n_mixes": 1000,
-                        "premixed": false
+                        "premixed": true
                     }
                 }
             ]
@@ -76,25 +107,41 @@
     "optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 0.001
+            "lr": 0.0006
         }
     },
     "loss": {
         "type": "SpexLoss",
         "args": {
             "alpha": 0.1,
-            "beta": 0.1
+            "beta": 0.1,
+            "gamma": 0.5
         }
     },
-    "metrics": [],
+    "metrics": [
+        {
+            "type": "PESQ",
+            "args": {
+                "sampling_frequency": 16000,
+                "mode": "wb",
+                "epoch_freq": 10
+            }
+        },
+        {
+            "type": "EvalSISDR",
+            "args": {
+                "epoch_freq": 3
+            }
+        }
+    ],
     "lr_scheduler": {
         "type": "OneCycleLR",
         "args": {
             "steps_per_epoch": 500,
             "epochs": 100,
             "anneal_strategy": "cos",
-            "max_lr": 0.001,
-            "pct_start": 0.07
+            "max_lr": 0.0003,
+            "pct_start": 0.05
         }
     },
     "trainer": {

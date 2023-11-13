@@ -22,7 +22,11 @@ cd ..
 ```
 теперь запускаем обучение:
 ```bash
-
+python train.py --config ss/configs/spexp.json
+```
+кладем веса95 https://drive.google.com/drive/folders/1qcMY2sN1mK1AYI27BXjoy4bOomjPJ14c?usp=sharing в `checkpoints/exp3/checkpoint-epoch95.pth` запускаем test :
+```bash
+python test.py --config test_configs/public.json --resume checkpoints/exp3/checkpoint-epoch95.pth
 ```
 
 ## Obtain WHAM mixes
