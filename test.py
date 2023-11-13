@@ -14,6 +14,7 @@ from ss.utils.parse_config import ConfigParser
 
 from torchmetrics.audio import ScaleInvariantSignalDistortionRatio
 from torchmetrics.audio import PerceptualEvaluationSpeechQuality
+import torchaudio
 
 DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
 
@@ -60,6 +61,16 @@ def main(config, out_file):
 
             sisdr_metric += sisdr(pred['s1'], target).item()
             pesq_metric += pesq(pred['s1'], target).item()
+            if out_file is not None:
+                if not os.path.exists(out_file):
+                    os.makedirs(out_file)
+                
+                wav_name = f'{os.path.split(item["mix_path"])[-1].split("-")[0]}-predicted.flac'
+                torchaudio.save(
+                    uri=f"{out_file}/{wav_name}",
+                    src=pred['s1'].squeeze(0).cpu(),
+                    sample_rate=config['preprocessing']['sr']
+                )
     
     sisdr_metric /= len(dataloaders['test'].dataset)
     pesq_metric /= len(dataloaders['test'].dataset)
@@ -96,9 +107,9 @@ if __name__ == "__main__":
     args.add_argument(
         "-o",
         "--output",
-        default="output.json",
+        default=None,
         type=str,
-        help="File to write results (.json)",
+        help="directory to write predictions",
     )
     args.add_argument(
         "-t",
