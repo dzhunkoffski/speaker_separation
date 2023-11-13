@@ -13,22 +13,22 @@
                 "args": {
                     "n_steps": 4,
                     "sample_rate": 16000,
-                    "p": 0.25
+                    "p": 0.2
                 }
             },
             {
                 "type": "GaussianNoise",
                 "args": {
-                    "alpha": 1.5,
+                    "alpha": 1.0,
                     "mean": 0.1,
                     "std": 0.01,
-                    "p": 0.25
+                    "p": 0.2
                 }
             },
             {
                 "type": "SpeedPerturbation",
                 "args": {
-                    "p": 0.25,
+                    "p": 0.2,
                     "orig_freq": 16000,
                     "factors": [
                         0.5,
@@ -42,7 +42,7 @@
         "spectrogram": []
     },
     "arch": {
-        "type": "SpexPlus",
+        "type": "SpexPlusOld",
         "args": {
             "sr": 16000,
             "n_encoder_filters": 128,
@@ -50,7 +50,7 @@
             "n_resnets": 3,
             "O": 256,
             "Q": 3,
-            "P": 512,
+            "P": 256,
             "n_tcn_stacks": 4,
             "n_tcn_blocks_in_stack": 8,
             "use_speaker_class": true
@@ -58,7 +58,7 @@
     },
     "data": {
         "train": {
-            "batch_size": 4,
+            "batch_size": 10,
             "num_workers": 4,
             "datasets": [
                 {
@@ -83,7 +83,7 @@
             ]
         },
         "val": {
-            "batch_size": 4,
+            "batch_size": 10,
             "num_workers": 4,
             "datasets": [
                 {
@@ -107,7 +107,7 @@
     "optimizer": {
         "type": "Adam",
         "args": {
-            "lr": 0.001
+            "lr": 0.0006
         }
     },
     "loss": {
@@ -124,33 +124,27 @@
             "args": {
                 "sampling_frequency": 16000,
                 "mode": "wb",
-                "epoch_freq": 10
+                "epoch_freq": 20
             }
         },
         {
             "type": "EvalSISDR",
             "args": {
-                "epoch_freq": 2
-            }
-        },
-        {
-            "type": "CrossEntropy",
-            "args": {
-                "epoch_freq": 1
+                "epoch_freq": 3
             }
         }
     ],
     "lr_scheduler": {
-        "type": "ReduceLROnPlateau",
+        "type": "OneCycleLR",
         "args": {
-            "mode": "min",
-            "factor": 0.5,
-            "patience": 2,
-            "cooldown": 1
+            "steps_per_epoch": 500,
+            "epochs": 100,
+            "anneal_strategy": "cos",
+            "max_lr": 0.0003,
+            "pct_start": 0.05
         }
     },
     "trainer": {
-        "kaggle_account": "dzhunkoffski",
         "epochs": 100,
         "save_dir": "saved/",
         "save_period": 5,
