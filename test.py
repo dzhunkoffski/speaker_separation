@@ -29,7 +29,7 @@ def main(config, out_file):
     dataloaders = get_dataloaders(config)
 
     # build model architecture
-    config['arch']['args']['n_speakers'] = len(dataloaders['train'].dataset.target_code2target_ids)
+    config['arch']['args']['n_speakers'] = 143
     model = config.init_obj(config["arch"], module_model)
     logger.info(model)
 
@@ -160,17 +160,22 @@ if __name__ == "__main__":
                 "num_workers": args.jobs,
                 "datasets": [
                     {
-                        "type": "CustomDirAudioDataset",
+                        "type": "CustomDirDataset",
                         "args": {
-                            "audio_dir": str(test_data_folder / "audio"),
-                            "transcription_dir": str(
-                                test_data_folder / "transcriptions"
+                            "mixes_dir": str(test_data_folder),
+                            "refs_dir": str(
+                                test_data_folder
                             ),
+                            "targets_dir": str(
+                                test_data_folder
+                            )
                         },
                     }
                 ],
             }
         }
+
+    print('Instantiated customdirdataset')
 
     assert config.config.get("data", {}).get("test", None) is not None
     config["data"]["test"]["batch_size"] = args.batch_size
