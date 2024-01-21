@@ -256,7 +256,6 @@ class SpexPlus(BaseModel):
             n_tcn_stacks=n_tcn_stacks, n_tcn_blocks_in_stack=n_tcn_blocks_in_stack
         )
 
-        # FIXME: maybe should apply different kernel size
         self.decoder_short = nn.ConvTranspose1d(
             in_channels=n_encoder_filters, out_channels=1, 
             kernel_size=int(L1 * sr), stride=int(L1 * sr // 2)
